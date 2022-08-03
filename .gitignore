@@ -1,0 +1,8 @@
+.DS_Store
+.DS_Store/
+.ipynb_checkpoints/
+notebooks/
+data/
+venv/
+__pycache__/
+chromedriver
