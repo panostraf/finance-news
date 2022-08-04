@@ -35,10 +35,15 @@ def create_word_cloud(text):
     plt.show()
 
 if __name__ == '__main__':
-    file_path = sys.argv[1]
-    file_path = 'data/articles/' + file_path
+    news_collection = sys.argv[1]
+    # file_path = 'data/articles/' + file_path
+    import mongo_database
 
+    # from pymongo import MongoClient
+
+    se = mongo_database.StoreMongo(news_collection)
+    article = se.mergeAllArticles()
     preprocessing = prep.ArticlePreprocessing()
-    preprocessed_tokens = preprocessing.clean_tokens(article_path=file_path)
+    preprocessed_tokens = preprocessing.clean_tokens(text=article)
     preprocessed_text = preprocessing.tokens_to_doc(preprocessed_tokens)
     create_word_cloud(preprocessed_text)

@@ -1,4 +1,6 @@
 import os
+from collections import defaultdict
+import json
 
 
 def number_of_files(path="./data/articles/"):
@@ -9,6 +11,7 @@ def number_of_files(path="./data/articles/"):
             count += 1 
     print(count)
     return count
+
 
 
 if __name__=='__main__':

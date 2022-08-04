@@ -21,8 +21,8 @@ class ArticlePreprocessing:
     stpw.extend(stops)
 
 
-    def clean_tokens(self,article_path='data/articles/article1'):
-        text = open(article_path).read()
+    def clean_tokens(self,text):#article_path='data/articles/article1'):
+        # text = open(article_path).read()
         tokens = nltk.word_tokenize(text)
 
 

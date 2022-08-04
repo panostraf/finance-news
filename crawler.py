@@ -6,118 +6,80 @@ from collections import defaultdict
 from urllib3 import exceptions as exc
 import random
 from helpers import helpers
+from mongo_database import StoreMongo
+import sys
+import settings
 
-scrapped_articles = []
-
+# scrapped_articles = []
+# BASE_URL = """https://www.investing.com/news/commodities-news/"""
 
 class Crawler:
+    ''' initialize Chrome drivers - headless (not showing google chrome)'''
+    
     op = webdriver.ChromeOptions()
     op.add_argument('headless')
+    op.add_argument('--incognito')
     driver = webdriver.Chrome('./chromedriver',options=op)
     
+    
     def __init__(self,url):
+        '''Initialize url'''
         self.url = url
         # self.url = """https://www.investing.com/news/commodities-news/3"""
     
     def get_page(self):
-        self.driver.get(self.url)
-        content = self.driver.page_source
-        return content
-
-url = """https://www.investing.com/news/commodities-news/"""
-
-def main(url):
-    crawler = Crawler(url)
-    content = crawler.get_page()
-    parser = GetRecentArticles()
-    links = parser.extract_links(content)
-    
-    # with open('articles3.txt' ,'a') as f: 
-    #     for link in links:
-    #         try:
-    #             crawler.url = link
-    #             article_content = crawler.get_page()
-    #             article = parser.extract_article(article_content)
-    #             f.write(str(article) + "\n\n")
-    #             print(article)
-    #         except exc:
-    #             pass
-    #         time.sleep(5)
-
-    for link in links:
+        '''
+        makes request using selenium package and returns html page source code <str>
+        If not content available returns None
+        '''
         try:
-            crawler.url = link
-            article_content = crawler.get_page()
-            article = parser.extract_article(article_content)
+            self.driver.get(self.url)
+            content = self.driver.page_source
+            return content
+        except Exception as E:
+            print("Couldn't fetch", self.url)
+            print(E)
+        return
 
-            article_number = helpers.number_of_files() + 1
-            artcl_name = f"article{str(article_number)}"
 
-            with open(f'data/articles/{artcl_name}' ,'w') as f: 
-                f.write(str(article) + "\n\n")
-            f.close()
 
-            # print(article)
+def main(url,collection):
+    crawler = Crawler(url) #initialize crawler class
+    time.sleep(10)
+    content = crawler.get_page() # extract content (to gather urls)
+    parser = GetRecentArticles(url) # Initialize parser class
+    links = parser.extract_links(content) # Extract list of articles (urls)
+    sm = StoreMongo(collection)
 
+    if not links:
+        return
+    # visit each article and parse it's content
+    for link in links:
+        crawler.url = link
+        article_content = crawler.get_page()
+        if not article_content:
+            continue
+        print(link)
+        # clean text of the article page (only <p> tags )
+        article = parser.extract_article(article_content) 
+
+        try:
+            # extract date and title of the article
+            date, title = parser.extract_article_info(article_content)
+            
         except:
-            pass
+            print("date and title not found")
+            date,title = "NA","NA"
 
+
+        sm.insert_values(article,date,title)
         sleep_time = random.randint(1,6)
         time.sleep(sleep_time)
 
     crawler.driver.quit()
 
-
-for i in range(1,5):
-    print('page:',i)
-    url = url + str(i)
-    main(url)
-
-
-quit()
-exit(-1)
-
-op = webdriver.ChromeOptions()
-op.add_argument('headless')
-driver = webdriver.Chrome('./chromedriver',options=op)
-
-
-
-
-url = """https://www.investing.com/news/commodities-news/3"""
-driver.get(url)
-content = driver.page_source
-
-parser = GetRecentArticles()
-links = parser.extract_links(content)
-
-id = 0
-
-with open('articles.txt','a') as f:
-    for link in links:
-        driver.get(link)
-        article = parser.extract_article(driver.page_source)
-        
-        f.write(str(article)+',')
-        time.sleep(3)
-f.close()
-
-# def extract_content(content_):
-#     cont_soup = BeautifulSoup(content_)
-#     paragraphs = cont_soup.findAll('p')
-#     article = ""
-#     for p in paragraphs[2:-20]:
-#         article += f" {p.text}"
-#     return article
-
-
-# soup2 = BeautifulSoup(content)
-# print(soup2)
-
-
-time.sleep(20)
-
-driver.quit()
-
-
-
+if __name__=='__main__':
+    category = sys.argv[1]
+    url = settings.collections[category]['BASE_URL']
+    collection = settings.collections[category]['collection']
+    main(url,collection)

@@ -3,8 +3,12 @@ from bs4 import BeautifulSoup
 
 
 class GetRecentArticles:
-    BASE_URL = """https://www.investing.com/news/commodities-news"""
-    pages = 4
+    
+    def __init__(self,url):
+        self.BASE_URL = url
+        self.url_suffix = url.split('/')[-1]
+
+
     
     def extract_article(self,content_):
         '''
@@ -22,15 +26,18 @@ class GetRecentArticles:
         cont_soup = BeautifulSoup(content_,parser='lxml',features="lxml")
         date = cont_soup.findAll('div',class_='contentSectionDetails')
         title = cont_soup.findAll('h1',class_='articleHeader')
-        print(cont_soup.findAll('h1'))
-        return date, title
+        
+        return date[0].text, title[0].text
 
     def extract_links(self,page):
         '''
         Input <str> page source code from investing.com news
         Returns generator function with all the links for commodities
         '''
-        soup = BeautifulSoup(page,parser='lxml',features="lxml")
+        try:
+            soup = BeautifulSoup(page,parser='lxml',features="lxml")
+        except TypeError:
+            return
             
         articles = soup.find_all('article')
         for article in articles:
@@ -47,7 +54,7 @@ class GetRecentArticles:
         validates that a url refers to commodities
         '''
         url = url.split("/")
-        if "commodities-news" in url:
+        if self.url_suffix in url:
             return  self.BASE_URL + url[-1]
         return None
 
