@@ -40,9 +40,13 @@ if __name__ == '__main__':
     import mongo_database
 
     # from pymongo import MongoClient
+    if news_collection == 'all':
+        se = mongo_database.StoreMongo()
+        article = se.all_collections()
+    else:
+        se = mongo_database.StoreMongo(news_collection)
+        article = se.mergeAllArticles()
 
-    se = mongo_database.StoreMongo(news_collection)
-    article = se.mergeAllArticles()
     preprocessing = prep.ArticlePreprocessing()
     preprocessed_tokens = preprocessing.clean_tokens(text=article)
     preprocessed_text = preprocessing.tokens_to_doc(preprocessed_tokens)

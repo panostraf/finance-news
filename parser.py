@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-
+from helpers import helpers
 
 class GetRecentArticles:
     
@@ -26,8 +26,8 @@ class GetRecentArticles:
         cont_soup = BeautifulSoup(content_,parser='lxml',features="lxml")
         date = cont_soup.findAll('div',class_='contentSectionDetails')
         title = cont_soup.findAll('h1',class_='articleHeader')
-        
-        return date[0].text, title[0].text
+        date = helpers.convert_date(date[0].text)
+        return date, title[0].text
 
     def extract_links(self,page):
         '''

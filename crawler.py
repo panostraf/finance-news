@@ -70,7 +70,7 @@ def main(url,collection):
         except:
             print("date and title not found")
             date,title = "NA","NA"
-
+        # date, title = parser.extract_article_info(article_content)
 
         sm.insert_values(article,date,title)
         sleep_time = random.randint(1,6)

@@ -25,4 +25,8 @@ collections = {
         'BASE_URL':'https://www.investing.com/news/economic-indicators',
         'collection':'economic_indicators'
     },
+    'latest_news':{
+        'BASE_URL':'https://www.investing.com/news/latest-news',
+        'collection':'latest_news'
+    },
 }
