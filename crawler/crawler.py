@@ -1,14 +1,20 @@
 from selenium import webdriver
 from bs4 import BeautifulSoup
-import time
-from parser import GetRecentArticles
+
+
 from collections import defaultdict
-from urllib3 import exceptions as exc
+import time
 import random
-from helpers import helpers
-from mongo_database import StoreMongo
 import sys
-import settings
+
+
+# import custom files
+import crawler.settings
+print('ok')
+from .helpers.helpers import *
+from .mongo_database import StoreMongo
+from .parser import GetRecentArticles
+# import settings
 
 # scrapped_articles = []
 # BASE_URL = """https://www.investing.com/news/commodities-news/"""
@@ -16,15 +22,17 @@ import settings
 class Crawler:
     ''' initialize Chrome drivers - headless (not showing google chrome)'''
     
-    op = webdriver.ChromeOptions()
-    op.add_argument('headless')
-    op.add_argument('--incognito')
-    driver = webdriver.Chrome('./chromedriver',options=op)
     
+    # /Users/panos/Documents/stocks/crawler
     
     def __init__(self,url):
         '''Initialize url'''
         self.url = url
+
+        op = webdriver.ChromeOptions()
+        op.add_argument('headless')
+        op.add_argument('--incognito')
+        self.driver = webdriver.Chrome('./crawler/chromedriver',options=op)
         # self.url = """https://www.investing.com/news/commodities-news/3"""
     
     def get_page(self):
@@ -40,6 +48,11 @@ class Crawler:
             print("Couldn't fetch", self.url)
             print(E)
         return
+
+    def close_connection(self):
+        self.driver.close()
+        self.driver.quit()
+
 
 
 
@@ -72,11 +85,11 @@ def main(url,collection):
             date,title = "NA","NA"
         # date, title = parser.extract_article_info(article_content)
 
-        sm.insert_values(article,date,title)
+        sm.insert_values(article,date,title,link)
         sleep_time = random.randint(1,6)
         time.sleep(sleep_time)
 
-    crawler.driver.quit()
+    crawler.close_connection()
 
 if __name__=='__main__':
     category = sys.argv[1]

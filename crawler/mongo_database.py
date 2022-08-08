@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 import re
-from helpers import helpers
+from .helpers.helpers import *
 
 
 class StoreMongo:
@@ -13,10 +13,11 @@ class StoreMongo:
         
         
 
-    def insert_values(self,article,date,title):
+    def insert_values(self,article,date,title,url):
         post = {
                 'title':title,
                 'date':date,
+                'url':url,
                 'article':article,        
         }
         self.collection.insert_one(post)
